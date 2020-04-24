@@ -70,7 +70,7 @@ namespace RestNegotiateClient
             ticketRequest.ApOptions |= ApOptions.MutualRequired;
             ticketRequest.Realm = "OX.AC.UK";
             */
-            var ticket = await client.GetServiceTicket("HTTP/" + uri.DnsSafeHost + "@OX.AC.UK");
+            var ticket = await client.GetServiceTicket("HTTP/" + uri.DnsSafeHost);
             String spnego = Convert.ToBase64String(ticket.EncodeGssApi().ToArray());
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Negotiate", spnego);
