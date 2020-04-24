@@ -31,7 +31,7 @@ namespace RestNegotiateClient
                     .AddFilter("Microsoft", LogLevel.Warning)
                     .AddFilter("System", LogLevel.Warning)
                     .AddFilter("RestNegotiateClient.Program", LogLevel.Debug)
-                    .AddFilter("Kerberos.Net", LogLevel.Warning)
+                    .AddFilter("Kerberos.Net", LogLevel.Trace)
 		    .AddConsole(delegate(ConsoleLoggerOptions d) {  });
             });
             logger = loggerFactory.CreateLogger<Program>();
