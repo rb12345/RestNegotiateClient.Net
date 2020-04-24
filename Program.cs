@@ -22,7 +22,7 @@ namespace RestNegotiateClient
     class Program
     {
         static ILogger logger;
-	static ILoggerFactory loggerFactory;
+        static ILoggerFactory loggerFactory;
         static async Task Main(string[] args)
         {
             loggerFactory = LoggerFactory.Create(builder =>
@@ -32,7 +32,7 @@ namespace RestNegotiateClient
                     .AddFilter("System", LogLevel.Warning)
                     .AddFilter("RestNegotiateClient.Program", LogLevel.Debug)
                     .AddFilter("Kerberos.Net", LogLevel.Trace)
-		    .AddConsole(delegate(ConsoleLoggerOptions d) {  });
+                    .AddConsole(delegate(ConsoleLoggerOptions d) {  });
             });
             logger = loggerFactory.CreateLogger<Program>();
             /*CommandLineArguments parsedArgs = new CommandLineArguments(args);
@@ -49,11 +49,11 @@ namespace RestNegotiateClient
             String outfile = args[3];
             Console.Error.WriteLine("keytab={0}, principal={1}, url={2}", keytab, principal, url, outfile);
 
+            // Check URL is syntactically valid
             Uri uri = null;
             if (!Uri.TryCreate(url, UriKind.Absolute, out uri)) {
                 throw new ArgumentException(String.Format("Invalid URL: {0}", url));
             }
-            String serverPrincipal = String.Format("HTTP/", uri.Host);
 
             IKerberosTransport[] transports = {new UdpKerberosTransport("kdc0.ox.ac.uk")};
             transports[0].Enabled = true;
@@ -61,16 +61,13 @@ namespace RestNegotiateClient
             client.AuthenticationOptions ^= AuthenticationOptions.Canonicalize;
             var keyTable = new KeyTable(File.ReadAllBytes(keytab));
             var kerbCred = new KeytabCredential(principal, keyTable, "OX.AC.UK");
-            Console.WriteLine("User name: {0}", kerbCred.UserName);
+            logger.LogDebug("User name: {0}", kerbCred.UserName);
             await client.Authenticate(kerbCred);
-            Console.WriteLine("Authenticated!");
-            /*
-            var ticketRequest = new RequestServiceTicket();
-            ticketRequest.ServicePrincipalName = KrbPrincipalName.FromString("HTTP/" + uri.DnsSafeHost, PrincipalNameType.NT_PRINCIPAL, "OX.AC.UK").ToString();
-            ticketRequest.ApOptions |= ApOptions.MutualRequired;
-            ticketRequest.Realm = "OX.AC.UK";
-            */
-            var ticket = await client.GetServiceTicket("HTTP/" + uri.DnsSafeHost);
+            logger.LogDebug("Authenticated!");
+
+            // Now get a service ticket for the HTTP server and perform the request
+            String serverPrincipal = String.Format("HTTP/{0}", uri.DnsSafeHost);
+            var ticket = await client.GetServiceTicket(serverPrincipal);
             String spnego = Convert.ToBase64String(ticket.EncodeGssApi().ToArray());
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Negotiate", spnego);
