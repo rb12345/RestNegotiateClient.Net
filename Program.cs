@@ -58,6 +58,7 @@ namespace RestNegotiateClient
             IKerberosTransport[] transports = {new UdpKerberosTransport("kdc0.ox.ac.uk")};
             transports[0].Enabled = true;
             var client = new KerberosClient(loggerFactory, transports);
+            client.AuthenticationOptions ^= AuthenticationOptions.Canonicalize;
             var keyTable = new KeyTable(File.ReadAllBytes(keytab));
             var kerbCred = new KeytabCredential(principal, keyTable, "OX.AC.UK");
             Console.WriteLine("User name: {0}", kerbCred.UserName);
