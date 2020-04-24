@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 using System.Net.Http;
@@ -55,10 +56,10 @@ namespace RestNegotiateClient
                 throw new ArgumentException(String.Format("Invalid URL: {0}", url));
             }
 
-            IKerberosTransport[] transports = {new UdpKerberosTransport("kdc0.ox.ac.uk")};
-            transports[0].Enabled = true;
-            var client = new KerberosClient(loggerFactory, transports);
+            var client = new KerberosClient("kdc0.ox.ac.uk", loggerFactory);
             client.AuthenticationOptions ^= AuthenticationOptions.Canonicalize;
+            var udp = client.Transports.OfType<UdpKerberosTransport>().FirstOrDefault();
+            udp.Enabled = true;
             var keyTable = new KeyTable(File.ReadAllBytes(keytab));
             var kerbCred = new KeytabCredential(principal, keyTable, "OX.AC.UK");
             logger.LogDebug("User name: {0}", kerbCred.UserName);
